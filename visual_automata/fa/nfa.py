@@ -466,10 +466,11 @@ class VisualNFA:
         Returns:
             list: All possible transitions for all the given input symbols.
         """
-        all_transitions = all_transitions.deepcopy()
+        all_transitions = {k:v for k,v in all_transitions.items()}
         transition_possibilities: list = []
         for state, state_transitions in all_transitions.items():
             for symbol, transitions in state_transitions.items():
+                transitions = set(transitions)
                 if len(transitions) < 2:
                     if transitions != "" and transitions != {}:
                         transitions = transitions.pop()
