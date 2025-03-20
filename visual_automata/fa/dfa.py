@@ -28,7 +28,7 @@ class VisualDFA:
         input_symbols: set = None,
         transitions: dict = None,
         initial_state: str = None,
-        final_states: set = None
+        final_states: set = None,
     ):
 
         if dfa:
@@ -99,7 +99,7 @@ class VisualDFA:
         """Create a deep copy of the automaton."""
         return self.__class__(**vars(self))
 
-    def minify(self) -> DFA:
+    def minify(self, retain_names: bool = True) -> DFA:
         """
         Create a minimal DFA which accepts the same inputs as this DFA.
         First, non-reachable states are removed.
@@ -111,7 +111,7 @@ class VisualDFA:
             DFA: A new minimal VisualDFA, if applicable.
         """
         new_dfa = self.dfa.copy()
-        new_dfa = new_dfa.minify()
+        new_dfa = new_dfa.minify(retain_names=retain_names)
         new_dfa = VisualDFA(new_dfa)
         return new_dfa
 
@@ -222,7 +222,11 @@ class VisualDFA:
 
     @staticmethod
     def __transition_steps(
-        initial_state, final_states, input_str: str, transitions_taken: list, status: bool
+        initial_state,
+        final_states,
+        input_str: str,
+        transitions_taken: list,
+        status: bool,
     ) -> DataFrame:
         """
         Generates a table of taken transitions based on the input string and it's result.
@@ -239,10 +243,7 @@ class VisualDFA:
         """
         current_states = transitions_taken.copy()
         for i, state in enumerate(current_states):
-            if (
-                state == initial_state and state in
-                final_states
-            ):
+            if state == initial_state and state in final_states:
                 current_states[i] = "→*" + state
             elif state == initial_state:
                 current_states[i] = "→" + state
@@ -260,9 +261,7 @@ class VisualDFA:
             "New state:": new_states,
         }
 
-        transition_steps = pd.DataFrame.from_dict(
-            transition_steps
-        )
+        transition_steps = pd.DataFrame.from_dict(transition_steps)
         transition_steps.index += 1
         transition_steps = pd.DataFrame.from_dict(
             transition_steps
@@ -298,7 +297,9 @@ class VisualDFA:
             Union[bool, list, list]: If the last state is the final state, transition pairs, and steps taken.
         """
         if not isinstance(input_str, str):
-            raise TypeError(f"input_str should be a string. {input_str} is {type(input_str)}, not a string.")
+            raise TypeError(
+                f"input_str should be a string. {input_str} is {type(input_str)}, not a string."
+            )
 
         current_state = self.dfa.initial_state
         transitions_taken = [current_state]
@@ -399,8 +400,8 @@ class VisualDFA:
         # Defining all states.
         for state in sorted(self.dfa.states):
             if (
-                state in self.dfa.initial_state and state in
-                self.dfa.final_states
+                state in self.dfa.initial_state
+                and state in self.dfa.final_states
             ):
                 graph.node(state, shape="doublecircle", fontsize=font_size)
             elif state in self.dfa.initial_state:
